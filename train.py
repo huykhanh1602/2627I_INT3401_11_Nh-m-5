@@ -75,7 +75,24 @@ def train_languageid(model, dataset):
     """
     model.train()
     "*** YOUR CODE HERE ***"
+    dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
+    optimizer = optim.Adam(model.parameters(), lr=0.002)
 
+    for epoch in range(30):
+        for batch in dataloader:
+            x = movedim(batch['x'], 0, 1)    # (batch, L, 47) -> (L, batch, 47)
+            y = batch['label']
+
+            optimizer.zero_grad()            # xóa gradient của lượt trước
+            y_pred = model(x)                # dự đoán
+            loss = languageid_loss(y_pred, y)
+            loss.backward()                  # tính gradient
+            optimizer.step()                 # cập nhật trọng số
+
+        val_acc = dataset.get_validation_accuracy()
+        print(f"Epoch {epoch + 1}: validation accuracy = {val_acc:.4f}")
+        if val_acc >= 0.86:                  # dừng sớm khi đủ tốt
+            break
 
 
 def Train_DigitConvolution(model, dataset):

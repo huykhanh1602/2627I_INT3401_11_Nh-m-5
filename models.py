@@ -160,6 +160,10 @@ class LanguageIDModel(Module):
         self.languages = ["English", "Spanish", "Finnish", "Dutch", "Polish"]
         super(LanguageIDModel, self).__init__()
         "*** YOUR CODE HERE ***"
+        d = 256                                        # kích thước trạng thái ẩn h
+        self.Wx = Linear(self.num_chars, d)            # xử lý chữ cái hiện tại
+        self.Wh = Linear(d, d)                         # xử lý trạng thái ẩn trước đó
+        self.out = Linear(d, len(self.languages))      # ra 5 điểm số
         # Initialize your model parameters here
 
 
@@ -194,6 +198,11 @@ class LanguageIDModel(Module):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
+        
+        h = relu(self.Wx(xs[0]))                       # chữ cái đầu tiên: f_initial
+        for x in xs[1:]:                               # các chữ cái còn lại
+            h = relu(self.Wx(x) + self.Wh(h))          # f(h, x): trộn chữ mới + bộ nhớ cũ
+        return self.out(h)                             # không có relu ở lớp cuối
 
 
 
