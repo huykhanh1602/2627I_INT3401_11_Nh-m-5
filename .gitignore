@@ -4,6 +4,13 @@ data/
 *.tar.gz
 *.tgz
 
+# === KHÓA CÁC FILE HỆ THỐNG / AUTOGRADER (Không cho Git & AI chạm vào) ===
+autograder.py
+backend.py
+chargpt.py
+gpt_model.py
+VERSION
+
 # === Python Cache & Compiled Files ===
 __pycache__/
 *.py[cod]
