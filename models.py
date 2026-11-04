@@ -40,8 +40,9 @@ class PerceptronModel(Module):
         Hint: You can use ones(dim) to create a tensor of dimension dim.
         """
         super(PerceptronModel, self).__init__()
-
+        
         "*** YOUR CODE HERE ***"
+        self.w = Parameter(ones(dimensions))
 
 
     def get_weights(self):
@@ -61,6 +62,7 @@ class PerceptronModel(Module):
         The pytorch function `tensordot` may be helpful here.
         """
         "*** YOUR CODE HERE ***"
+        return tensordot(self.w, x, dims=1)
 
         
 
@@ -73,6 +75,10 @@ class PerceptronModel(Module):
         score = self(x)
 
         "*** YOUR CODE HERE ***"
+        if score.item() >= 0:
+            return 1
+        else:
+            return -1
 
 
 
@@ -87,6 +93,9 @@ class RegressionModel(Module):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
         super().__init__()
+        self.fc1 = Linear(1, 64)
+        self.fc2 = Linear(64, 64)
+        self.fc3 = Linear(64, 1)
    
 
     def forward(self, x):
@@ -99,6 +108,12 @@ class RegressionModel(Module):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
+        x = relu(self.fc1(x))
+        x = relu(self.fc2(x))
+        x = self.fc3(x)
+
+        return x
+
 
 
 class DigitClassificationModel(Module):
@@ -122,6 +137,9 @@ class DigitClassificationModel(Module):
         input_size = 28 * 28
         output_size = 10
         "*** YOUR CODE HERE ***"
+        self.fc1 = Linear(input_size, 256)
+        self.fc2 = Linear(256, 128)
+        self.fc3 = Linear(128, output_size)
 
 
     def forward(self, x):
@@ -139,6 +157,11 @@ class DigitClassificationModel(Module):
                 (also called logits)
         """
         """ YOUR CODE HERE """
+        x = relu(self.fc1(x))
+        x = relu(self.fc2(x))
+        x = self.fc3(x)
+
+        return x
 
 
 

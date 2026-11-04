@@ -31,6 +31,20 @@ def train_perceptron(model, dataset):
     with no_grad():
         dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
         "*** YOUR CODE HERE ***"
+        converged = False
+
+        while not converged:
+            converged = True
+
+            for batch in dataloader:
+                x = batch["x"].squeeze(0)
+                y = batch["label"].item()
+
+                prediction = model.get_prediction(x)
+
+                if prediction != y:
+                    model.w += y * x
+                    converged = False
 
 
 def train_regression(model, dataset):
@@ -49,6 +63,41 @@ def train_regression(model, dataset):
         
     """
     "*** YOUR CODE HERE ***"
+    model.train()
+
+    dataloader = DataLoader(
+        dataset,
+        batch_size=64,
+        shuffle=True
+    )
+
+    optimizer = optim.Adam(
+        model.parameters(),
+        lr=0.001
+    )
+
+    for epoch in range(200):
+        total_loss = 0.0
+
+        for batch in dataloader:
+            x = batch["x"]
+            y = batch["label"]
+
+            optimizer.zero_grad()
+
+            y_pred = model(x)
+            loss = regression_loss(y_pred, y)
+
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+
+        if (epoch + 1) % 20 == 0:
+            print(
+                f"Epoch {epoch + 1}/200, "
+                f"Loss: {total_loss / len(dataloader):.6f}"
+            )
 
 
 def train_digitclassifier(model, dataset):
@@ -57,6 +106,40 @@ def train_digitclassifier(model, dataset):
     """
     model.train()
     """ YOUR CODE HERE """
+    dataloader = DataLoader(
+        dataset,
+        batch_size=128,
+        shuffle=True
+    )
+
+    optimizer = optim.Adam(
+        model.parameters(),
+        lr=0.001
+    )
+
+    for epoch in range(15):
+        total_loss = 0.0
+
+        for batch in dataloader:
+            x = batch["x"]
+            y = batch["label"]
+
+            optimizer.zero_grad()
+
+            y_pred = model(x)
+
+            loss = digitclassifier_loss(y_pred, y)
+
+            loss.backward()
+
+            optimizer.step()
+
+            total_loss += loss.item()
+
+        print(
+            f"Epoch {epoch + 1}/15, "
+            f"Loss: {total_loss / len(dataloader):.4f}"
+        )
 
 
 def train_languageid(model, dataset):
