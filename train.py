@@ -82,4 +82,22 @@ def Train_DigitConvolution(model, dataset):
     """
     Trains the model.
     """
-    """ YOUR CODE HERE """
+    model.train()
+    dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
+    optimizer = optim.Adam(model.parameters(), lr=0.002)
+
+    for epoch in range(30):
+        for batch in dataloader:
+            x = batch['x']              # đặc trưng ảnh MNIST
+            y = batch['label']          # nhãn chữ số
+
+            optimizer.zero_grad()       # xóa gradient của lượt trước
+            y_pred = model(x)           # forward: dự đoán logits
+            loss = digitconvolution_Loss(y_pred, y)
+            loss.backward()             # tính gradient
+            optimizer.step()            # cập nhật trọng số
+
+        val_acc = dataset.get_validation_accuracy()
+        print(f"Epoch {epoch + 1}: validation accuracy = {val_acc:.4f}")
+        if val_acc >= 0.80:             # dừng sớm khi đạt yêu cầu >= 80%
+            break

@@ -213,10 +213,24 @@ def Convolve(input: tensor, weight: tensor):
     The method 'zeros((y_dim,x_dim))' may also be useful. It initializes a pytorch tensor with dimensions (y_dim, x_dim), with every value
     set to zero.
     """
-    input_tensor_dimensions = input.shape
-    weight_dimensions = weight.shape
-    Output_Tensor = tensor(())
-    "*** YOUR CODE HERE ***"
+    # Lấy kích thước của ảnh input và kernel
+    input_tensor_dimensions = input.shape        # (H_in, W_in), ví dụ 28x28
+    weight_dimensions = weight.shape             # (H_k, W_k), ví dụ 3x3
+
+    # Kích thước output sau khi trượt kernel (không padding, stride = 1):
+    # out = H_in - H_k + 1  (và tương tự cho chiều rộng)
+    y_dim = input_tensor_dimensions[0] - weight_dimensions[0] + 1   # 28 - 3 + 1 = 26
+    x_dim = input_tensor_dimensions[1] - weight_dimensions[1] + 1   # 28 - 3 + 1 = 26
+    Output_Tensor = zeros((y_dim, x_dim))        # ma trận output khởi tạo toàn số 0
+
+    # Trượt kernel qua từng vị trí (y, x) trên input
+    for y in range(y_dim):
+        for x in range(x_dim):
+            # Cắt cửa sổ con có kích thước bằng kernel tại vị trí (y, x)
+            window = input[y:y + weight_dimensions[0], x:x + weight_dimensions[1]]
+            # Nhân từng phần tử tương ứng (element-wise) rồi cộng tổng lại:
+            # tensordot(window, weight, dims=2) = tổng(window * weight) trên cả 2 chiều
+            Output_Tensor[y, x] = tensordot(window, weight, dims=2)
 
     "*** End Code ***"
     return Output_Tensor
@@ -240,7 +254,12 @@ class DigitConvolutionalModel(Module):
         output_size = 10
 
         self.convolution_weights = Parameter(ones((3, 3)))
-        """ YOUR CODE HERE """
+
+        # Sau khi Convolve với kernel 3x3 lên ảnh 28x28, kích thước còn lại là 26x26
+        input_size = 26 * 26                     # 676 đặc trưng sau khi flatten
+        hidden_size = 128                        # kích thước lớp ẩn
+        self.fc1 = Linear(input_size, hidden_size)      # 676 -> hidden_size
+        self.fc2 = Linear(hidden_size, output_size)     # hidden_size -> 10 (logits)
 
 
     def forward(self, x):
@@ -252,8 +271,10 @@ class DigitConvolutionalModel(Module):
         x = stack(
             list(map(lambda sample: Convolve(sample, self.convolution_weights), x))
         )
-        x = x.flatten(start_dim=1)
-        """ YOUR CODE HERE """
+        x = x.flatten(start_dim=1)          # x giờ có shape (batch_size, 26*26) - vector 1 chiều
+
+        x = relu(self.fc1(x))               # lớp ẩn: Linear + relu
+        return self.fc2(x)                  # logits (batch_size, 10) - KHÔNG relu ở lớp cuối
 
 
 class Attention(Module):
@@ -292,5 +313,23 @@ class Attention(Module):
         """
         B, T, C = input.size()
 
-        """YOUR CODE HERE"""
+        # B1: Chiếu input lên 3 không gian Query, Key, Value
+        Q = self.q_layer(input)             # Query  (B, T, C)
+        K = self.k_layer(input)             # Key    (B, T, C)
+        V = self.v_layer(input)             # Value  (B, T, C)
+
+        # B2: Chuyển vị K từ (B, T, C) -> (B, C, T) để sẵn sàng nhân matmul với Q
+        K_T = movedim(K, 1, 2)
+
+        # B3: Scaled Dot-Product: nhân Q với K^T rồi chia sqrt(layer_size) để ổn định gradient
+        scores = matmul(Q, K_T) / (self.layer_size ** 0.5)      # (B, T, T)
+
+        # B4: Causal Mask - chặn vị trí tương lai (mask tam giác dưới), vị trí bị chặn = -inf
+        M = scores.masked_fill(self.mask[:, :, :T, :T] == 0, float('-inf'))[0]    # (T, T)
+
+        # B5: Softmax dọc theo chiều cuối cùng -> phân phối xác suất attention
+        attention_weights = softmax(M, dim=-1)                  # (T, T)
+
+        # B6: Tổ hợp có trọng số các Value theo attention weights
+        return matmul(attention_weights, V)                     # (B, T, C)
 

@@ -61,4 +61,4 @@ def digitconvolution_Loss(y_pred, y):
     Returns: a loss tensor
     """
     """ YOUR CODE HERE """
-    
+    return cross_entropy(y_pred, y)     # Cross-entropy chuẩn cho bài toán phân loại 10 chữ số
