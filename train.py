@@ -76,7 +76,7 @@ def train_regression(model, dataset):
         lr=0.001
     )
 
-    for epoch in range(200):
+    for epoch in range(1000):
         total_loss = 0.0
 
         for batch in dataloader:
@@ -93,11 +93,20 @@ def train_regression(model, dataset):
 
             total_loss += loss.item()
 
-        if (epoch + 1) % 20 == 0:
+        avg_loss = total_loss / len(dataloader)
+
+        if (epoch + 1) % 50 == 0:
             print(
-                f"Epoch {epoch + 1}/200, "
-                f"Loss: {total_loss / len(dataloader):.6f}"
+                f"Epoch {epoch + 1}/1000, "
+                f"Loss: {avg_loss:.6f}"
             )
+
+        if avg_loss < 0.005:
+            print(
+                f"Early stopping at epoch {epoch + 1}, "
+                f"Loss: {avg_loss:.6f}"
+            )
+            break
 
 
 def train_digitclassifier(model, dataset):

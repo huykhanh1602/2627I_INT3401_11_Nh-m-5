@@ -42,7 +42,7 @@ class PerceptronModel(Module):
         super(PerceptronModel, self).__init__()
         
         "*** YOUR CODE HERE ***"
-        self.w = Parameter(ones(dimensions))
+        self.w = Parameter(ones((1, dimensions)))
 
 
     def get_weights(self):
@@ -62,7 +62,7 @@ class PerceptronModel(Module):
         The pytorch function `tensordot` may be helpful here.
         """
         "*** YOUR CODE HERE ***"
-        return tensordot(self.w, x, dims=1)
+        return (self.w * x).sum()
 
         
 
@@ -74,12 +74,10 @@ class PerceptronModel(Module):
         """
         score = self(x)
 
-        "*** YOUR CODE HERE ***"
         if score.item() >= 0:
             return 1
         else:
             return -1
-
 
 
 class RegressionModel(Module):
@@ -162,6 +160,7 @@ class DigitClassificationModel(Module):
         x = self.fc3(x)
 
         return x
+        
 
 
 
