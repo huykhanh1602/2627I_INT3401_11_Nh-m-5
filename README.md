@@ -180,15 +180,7 @@ Số liệu ghi theo các lần chạy của nhóm (có thể dao động nhẹ 
 | Q7 | Không chấm | Val loss ≈ 1.83 | 0 |
 | | **Tổng** | | **25/25** |
 
-## 7. Lỗi thường gặp
 
-| Hiện tượng | Cách xử lý |
-|---|---|
-| `python` hiện Python 3.14 thay vì 3.11 | Chưa bật môi trường ảo, chạy lại `C:\venv_proj5\Scripts\activate` |
-| `git is not recognized` | Máy chưa cài Git, cài từ git-scm.com rồi mở lại terminal |
-| `IndentationError` | Thụt lề lệch khi dán code, mỗi cấp thụt 4 dấu cách |
-| `AttributeError ... get_weights` (Q1) | Thiếu hàm `get_weights` trong `PerceptronModel` |
-| Loss ra `nan` hoặc `inf` | Learning rate quá lớn, giảm một nửa |
 | Lỗi numpy khi import | Cài lại bản cũ: `pip install numpy==1.24.3` |
 | Test accuracy rớt sát ngưỡng | Chạy lại, hoặc nâng ngưỡng dừng sớm trên validation |
 | Q5 chạy chậm | Bình thường vì `Convolve` tự cài, bài dùng tập MNIST rút gọn nên vẫn đủ nhanh |
