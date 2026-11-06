@@ -3,7 +3,6 @@
 Bài tập lớn về học máy với **PyTorch**, gồm 7 câu: Perceptron, hồi quy phi tuyến, phân loại chữ số, nhận dạng ngôn ngữ bằng RNN, CNN, Attention và character-GPT.
 
 - Đề bài gốc: <https://inst.eecs.berkeley.edu/~cs188/archive/fa25/projects/proj5/>
-- Hạn nộp ghi trên đề gốc: Thứ Sáu 21/11, 23:59 (giờ PT). Hạn thực tế của lớp theo thông báo của giảng viên.
 
 ## Mục lục
 
