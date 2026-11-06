@@ -185,17 +185,7 @@ Số liệu ghi theo các lần chạy của nhóm (có thể dao động nhẹ 
 | Q7 | Không chấm | Val loss ≈ 1.83 | 0 |
 | | **Tổng** | | **25/25** |
 
-## 7. Nộp bài
-
-Theo đề bài:
-
-1. Nộp các file Python đã sửa lên **Gradescope**: `models.py`, `train.py`, `losses.py`. Nếu cần có thể tải toàn bộ file `.py` trong thư mục, nhưng không được sửa các file giáo viên cung cấp.
-2. Làm theo nhóm thì **chỉ một thành viên nộp**, và gắn thẻ (tag) thành viên còn lại trên Gradescope. Không nộp hai bài riêng cho cùng một đoạn code, vì có thể bị hệ thống đánh dấu nhầm là gian lận.
-3. Autograder đầy đủ chạy khoảng 12 phút với đáp án mẫu. Nếu code của nhóm chậm hơn nhiều, hãy kiểm tra lại hiệu năng.
-
-Quy trình Git của nhóm: mỗi thành viên làm trên nhánh riêng (ví dụ `Q4---Binh`), sau đó gộp vào `main`. Ba file `models.py`, `train.py`, `losses.py` do nhiều người cùng sửa nên có thể xung đột khi gộp. Khi gặp xung đột, giữ phần code của từng câu, không xóa phần của người khác.
-
-## 8. Lỗi thường gặp
+## 7. Lỗi thường gặp
 
 | Hiện tượng | Cách xử lý |
 |---|---|
@@ -209,14 +199,3 @@ Quy trình Git của nhóm: mỗi thành viên làm trên nhánh riêng (ví d�
 | Q5 chạy chậm | Bình thường vì `Convolve` tự cài, bài dùng tập MNIST rút gọn nên vẫn đủ nhanh |
 | Q7 báo không tìm thấy `input.txt` | Tải file từ trang đề và đặt vào thư mục dự án |
 
-## 9. Phân công nhóm
-
-| Câu | Người thực hiện | Ghi chú |
-|---|---|---|
-| Q1 | | |
-| Q2 | | |
-| Q3 | | |
-| Q4 | Bình | Nhánh `Q4---Binh` |
-| Q5 | | |
-| Q6 | | |
-| Q7 | | Tùy chọn |
