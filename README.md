@@ -1,4 +1,4 @@
-# Project 5: Machine Learning (CS188) - Nhóm 5, INT3401_11
+# Project 5: Machine Learning (CS188) - Nhóm 5 - INT3401_11
 
 Bài tập lớn về học máy với **PyTorch**, gồm 7 câu: Perceptron, hồi quy phi tuyến, phân loại chữ số, nhận dạng ngôn ngữ bằng RNN, CNN, Attention và character-GPT.
 
