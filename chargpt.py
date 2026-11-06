@@ -7,7 +7,7 @@ The above copyright notice and this permission notice shall be included in all c
 Modified version of Andrej Karpathy's "mingpt" repo found here: https://github.com/karpathy/minGPT
 """
 
-
+import random
 import torch
 from torch.utils.data import Dataset
 from torch.utils.data.dataloader import DataLoader
@@ -61,6 +61,18 @@ def train_single_iteration(model, data_iter):
     loss.backward()
    
     optimizer.step()
+    return loss.item()
+
+
+def eval_loss(model, dataset, n_batches=20, batch_size=500):
+    # average loss on randomly chosen chunks of the held-out data
+    total = 0.0
+    with torch.no_grad():
+        for _ in range(n_batches):
+            idxs = [random.randrange(len(dataset)) for _ in range(batch_size)]
+            xs, ys = zip(*[dataset[k] for k in idxs])
+            total += model.get_loss(torch.stack(xs), torch.stack(ys)).item()
+    return total / n_batches
 
  
 if __name__ == '__main__':
@@ -72,11 +84,16 @@ if __name__ == '__main__':
     context = "Pacman" #Generative prompt
     layer_size = 100
     n_layer = 6 #How many transformer blocks to have
+    torch.manual_seed(0)
+    random.seed(0)
 
-
-    # construct the training dataset
-    text = open('input.txt', 'r').read() 
-    train_dataset = CharDataset(text)
+    # construct the training dataset (90% train / 10% validation)
+    text = open('input.txt', 'r').read()
+    split = int(0.9 * len(text))
+    train_dataset = CharDataset(text)      # builds the character table from the whole text
+    val_dataset = CharDataset(text)
+    train_dataset.data = text[:split]
+    val_dataset.data = text[split:]
 
     # setup the dataloader
     train_loader = DataLoader(
@@ -92,21 +109,21 @@ if __name__ == '__main__':
 
     #set up model and optimizer
     model = Character_GPT(train_dataset.block_size, n_embd=layer_size, n_layer=n_layer, vocab_size=train_dataset.vocab_size)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.00004)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 
     for i in range(num_iterations):
-        train_single_iteration(model, train_iterations)
-        
+        loss = train_single_iteration(model, train_iterations)
+
         if i % checkpoint == 0:
+            val_loss = eval_loss(model, val_dataset)
+            print(f"Iteration {i}: train loss {loss:.4f}, val loss {val_loss:.4f}")
+
+        if i % 1000 == 0:
             with torch.no_grad():
-                print("Iteration: " + str(i) + "\n")
-                
-                # sample from the model...
                 print("Prompt: " + context)
                 print("Generated result: ")
                 x = torch.tensor([train_dataset.char2index[s] for s in context])[None,...]
                 y = model.generate(x, 500)[0]
-                completion = ''.join([train_dataset.index2char[int(i)] for i in y])
+                completion = ''.join([train_dataset.index2char[int(j)] for j in y])
                 print(completion + "\n")
-   
