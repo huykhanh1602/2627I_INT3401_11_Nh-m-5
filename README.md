@@ -113,13 +113,7 @@ Chỉ nộp `models.py`, `train.py`, `losses.py`. Không đổi tên hàm/lớp 
 
 (Con số cụ thể có thể dao động nhẹ giữa các lần chạy do tính ngẫu nhiên.)
 
-## 7. Quy tắc làm việc nhóm
-
-- Q1-Q6 cùng dùng `models.py`, `train.py`, `losses.py`, nên mỗi người chỉ sửa phần hàm/lớp của câu mình phụ trách, không ghi đè toàn bộ file của nhau.
-- Trước khi sửa, tạo nhánh Git riêng (ví dụ `git checkout -b q4-binh`); sau đó tích hợp và kiểm thử lại bằng autograder.
-- Một câu chỉ được xem là hoàn thành khi code đạt yêu cầu của đề, có kết quả kiểm thử, và người phụ trách giải thích được mô hình hoạt động thế nào, các lựa chọn chính và những lỗi đã khắc phục.
-
-## 8. Lỗi thường gặp
+## 7. Lỗi thường gặp
 
 | Hiện tượng | Cách xử lý |
 |---|---|
