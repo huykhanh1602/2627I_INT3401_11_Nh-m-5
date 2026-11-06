@@ -81,9 +81,9 @@ Trên macOS hoặc Linux: thay `py -3.11` bằng `python3.11`, và bật môi tr
 
 Lưu ý: mỗi lần mở terminal mới, cần `cd` vào thư mục dự án và bật lại môi trường ảo trước khi chạy.
 
-## 4. Cách chạy và chấm thử
+## 4. Cách chạy 
 
-Chấm từng câu (thêm `--no-graphics` để không mở cửa sổ đồ họa):
+Chạy từng câu (thêm `--no-graphics` để không mở cửa sổ đồ họa):
 
 ```powershell
 python autograder.py -q q1 --no-graphics   # Perceptron
@@ -94,7 +94,7 @@ python autograder.py -q q5 --no-graphics   # CNN
 python autograder.py -q q6 --no-graphics   # Attention
 ```
 
-Chấm toàn bộ (khoảng 12 phút trở lên, tùy máy):
+Chạy toàn bộ (khoảng 12 phút trở lên, tùy máy):
 
 ```powershell
 python autograder.py --no-graphics
@@ -105,10 +105,6 @@ Chạy Q7 (không có autograder, cần `input.txt` cùng thư mục):
 ```powershell
 python chargpt.py
 ```
-
-Cách đọc kết quả: `PASS` kèm `Question qN: x/x` là đạt. Điểm autograder ở máy chỉ là **điểm tạm tính**, điểm chính thức do Gradescope và giảng viên quyết định.
-
-Mỗi câu có yếu tố ngẫu nhiên (khởi tạo trọng số, xáo trộn dữ liệu). Nếu một câu rớt sát ngưỡng, chạy lại. Nếu rớt hai lần liên tiếp thì chỉnh siêu tham số.
 
 ## 5. Mô tả từng câu
 
