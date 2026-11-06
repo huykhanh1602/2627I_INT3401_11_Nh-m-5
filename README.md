@@ -179,10 +179,3 @@ Số liệu ghi theo các lần chạy của nhóm (có thể dao động nhẹ 
 | Q6 | Khớp kết quả autograder | Pass | 2/2 |
 | Q7 | Không chấm | Val loss ≈ 1.83 | 0 |
 | | **Tổng** | | **25/25** |
-
-
-| Lỗi numpy khi import | Cài lại bản cũ: `pip install numpy==1.24.3` |
-| Test accuracy rớt sát ngưỡng | Chạy lại, hoặc nâng ngưỡng dừng sớm trên validation |
-| Q5 chạy chậm | Bình thường vì `Convolve` tự cài, bài dùng tập MNIST rút gọn nên vẫn đủ nhanh |
-| Q7 báo không tìm thấy `input.txt` | Tải file từ trang đề và đặt vào thư mục dự án |
-
