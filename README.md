@@ -157,7 +157,7 @@ Mỗi tab của demo có nút Train và nút "Nạp trọng số đã lưu". Nê
 - **Mặt nạ nhân quả:** ký tự ở vị trí `i` chỉ được nhìn các vị trí `0…i`. Các ô bị che được gán `-inf` bằng `masked_fill` trước khi `softmax` theo chiều cuối.
 - Phép chuyển vị `Kᵀ` thực hiện bằng `movedim(K, 1, 2)`.
 
-### Q7: character-GPT (tùy chọn, 0 điểm)
+### Q7: character-GPT
 
 Mô hình ngôn ngữ mức ký tự, huấn luyện trên văn bản Shakespeare (`input.txt`), dự đoán ký tự tiếp theo rồi sinh văn bản từ prompt `"Pacman"`.
 
