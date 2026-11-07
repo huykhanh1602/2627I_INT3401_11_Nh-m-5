@@ -2,7 +2,7 @@
 
 Bài tập lớn về học máy với **PyTorch**, gồm 7 câu: Perceptron, hồi quy phi tuyến, phân loại chữ số, nhận dạng ngôn ngữ bằng RNN, CNN, Attention và character-GPT.
 
-- Đề bài gốc: <https://inst.eecs.berkeley.edu/~cs188/archive/fa25/projects/proj5/>
+- Đề bài: <https://inst.eecs.berkeley.edu/~cs188/archive/fa25/projects/proj5/>
 
 ## Mục lục
 
@@ -35,7 +35,8 @@ Bài tập lớn về học máy với **PyTorch**, gồm 7 câu: Perceptron, h�
 | `train.py` | Vòng huấn luyện cho từng mô hình | Có |
 | `losses.py` | Hàm loss cho từng bài | Có |
 | `gpt_model.py` | `Transformer_Block` và `Character_GPT` (Q7) | Đã có sẵn code ở các chỗ cần điền khi nhóm nhận file |
-| `chargpt.py` | Huấn luyện và sinh văn bản cho Q7 | Có, chỉnh để đo val loss (xem mục Q7). Bản gốc lưu ở `chargpt_goc.py` |
+| `chargpt.py` | Huấn luyện và sinh văn bản cho Q7 | Có: thêm tham số dòng lệnh và đo val loss (xem mục Q7). Bản gốc lưu ở `chargpt_goc.py` |
+| `logQ7_A.txt`, `logQ7_B.txt`, `logQ7_C.txt`, `logQ7_D.txt` | Log huấn luyện Q7 của bốn lần chạy (A, B, C khác nhau ở learning rate; D đổi thêm độ dài ngữ cảnh) | Không (kết quả chạy) |
 | `input.txt` | Văn bản Shakespeare cho Q7 (tải từ trang đề) | Không |
 | `demo.py` | Giao diện demo (Tkinter), mỗi câu một tab | File của nhóm, không nộp chấm |
 | `ui_weights/` | Trọng số do `demo.py` lưu sau khi huấn luyện | Tự sinh ra |
@@ -92,7 +93,7 @@ python autograder.py -q q5 --no-graphics   # CNN
 python autograder.py -q q6 --no-graphics   # Attention
 ```
 
-Chạy toàn bộ (khoảng 12 phút trở lên, tùy máy):
+Chạy toàn bộ (trên máy của nhóm mất khoảng 2 phút 23 giây; đề ghi khoảng 12 phút cho bản giải của giảng viên, tùy máy):
 
 ```powershell
 python autograder.py --no-graphics
@@ -101,8 +102,13 @@ python autograder.py --no-graphics
 Chạy Q7 (không có autograder, cần `input.txt` cùng thư mục). Dùng `-u` để chữ hiện ngay khi ghi log:
 
 ```powershell
-python -u chargpt.py | Tee-Object logQ7.txt
+python -u chargpt.py --lr 0.00004 --tag A | Tee-Object logQ7_A.txt   # lr gốc của giảng viên
+python -u chargpt.py --lr 0.0004  --tag B | Tee-Object logQ7_B.txt   # mặc định
+python -u chargpt.py --lr 0.001   --tag C | Tee-Object logQ7_C.txt
+python -u chargpt.py --lr 0.001 --block 32 --tag D | Tee-Object logQ7_D.txt   # ngữ cảnh 32 ký tự, chạy khoảng 75 phút
 ```
+
+Các tham số khác: `--block` (độ dài ngữ cảnh), `--embd` (số chiều), `--layers`, `--iters`, `--batch`, `--seed`. Dòng `CONFIG:` ở đầu log ghi lại cấu hình của lần chạy. Chạy thử nhanh: `python -u chargpt.py --iters 200 --tag thu`.
 
 Chạy demo giao diện (cần thư mục `data/` và, cho Q7, `input.txt`):
 
@@ -157,7 +163,7 @@ Mỗi tab của demo có nút Train và nút "Nạp trọng số đã lưu". Nê
 - **Mặt nạ nhân quả:** ký tự ở vị trí `i` chỉ được nhìn các vị trí `0…i`. Các ô bị che được gán `-inf` bằng `masked_fill` trước khi `softmax` theo chiều cuối.
 - Phép chuyển vị `Kᵀ` thực hiện bằng `movedim(K, 1, 2)`.
 
-### Q7: character-GPT
+### Q7: character-GPT (tùy chọn, 0 điểm)
 
 Mô hình ngôn ngữ mức ký tự, huấn luyện trên văn bản Shakespeare (`input.txt`), dự đoán ký tự tiếp theo rồi sinh văn bản từ prompt `"Pacman"`.
 
@@ -170,29 +176,47 @@ Mô hình ngôn ngữ mức ký tự, huấn luyện trên văn bản Shakespear
   ```
   Hai phép cộng `x + ...` là kết nối tắt (residual), giúp gradient truyền qua nhiều khối.
 - **`Character_GPT.forward`:** `Embedding` → `n_layer` khối Transformer nối tiếp → `LayerNorm` → `Linear` (không bias, không activation) → logits.
-- Code trong `Transformer_Block.forward` và `Character_GPT.forward` đã có sẵn khi nhóm nhận file `gpt_model.py`. Phần việc của nhóm ở Q7 là chạy huấn luyện, đo val loss và đánh giá kết quả. Q7 phụ thuộc vào lớp `Attention` của Q6.
+- Code trong `Transformer_Block.forward` và `Character_GPT.forward` đã có sẵn khi nhóm nhận file `gpt_model.py`. Phần việc của nhóm ở Q7 là chạy huấn luyện, đo val loss, so sánh learning rate và đánh giá kết quả. Q7 phụ thuộc vào lớp `Attention` của Q6.
 
-**Thiết lập thí nghiệm**
+**Thiết lập chung của cả bốn lần chạy**
 
 | Tham số | Giá trị |
 |---|---|
-| `block_size` (độ dài ngữ cảnh) | 10 |
+| `block_size` (độ dài ngữ cảnh) | 10 (lần A, B, C); **32** (lần D) |
 | `layer_size` (số chiều embedding) | 100 |
 | `n_layer` (số khối Transformer) | 6 |
+| Số tham số | 258 000 (vocab 65 ký tự; không đổi theo `block_size`) |
 | `batch_size` | 500 |
 | Số vòng lặp | 10 000 |
-| Optimizer | Adam, learning rate **0.0004** |
-| Loss | Cross-entropy |
+| Optimizer / Loss | Adam / cross-entropy |
 | Dữ liệu | 90% đầu của `input.txt` để huấn luyện, 10% cuối để đo val loss |
 | Seed | 0 |
 
-**Thay đổi so với `chargpt.py` gốc của giảng viên** (bản gốc lưu ở `chargpt_goc.py`):
+Các lần chạy khác nhau như sau:
 
-- Thêm hàm `eval_loss` đo val loss (trung bình 20 batch ngẫu nhiên trên 10% dữ liệu không dùng để huấn luyện), và in train loss cùng val loss mỗi 100 vòng.
-- Đặt seed để chạy lại ra kết quả tương tự.
-- Bản gốc khai báo biến `learning_rate = 0.0004` nhưng dòng tạo optimizer lại ghi cứng `lr=0.00004` nên biến đó không có tác dụng. Bản của nhóm dùng `lr=learning_rate`, tức là lr thực tế lớn hơn bản gốc 10 lần.
+| Lần | learning rate | `block_size` | Ý nghĩa |
+|---|---|---|---|
+| A | 0.00004 | 10 | Giá trị mà `chargpt.py` gốc của giảng viên thực sự dùng (ghi cứng ở dòng tạo optimizer) |
+| B | 0.0004 | 10 | Giá trị của biến `learning_rate` trong bản gốc, nhưng bản gốc không dùng biến này |
+| C | 0.001 | 10 | Lớn hơn nữa, để xem có còn cải thiện không |
+| D | 0.001 | 32 | Giữ lr của C, chỉ tăng độ dài ngữ cảnh để kiểm tra giả thuyết ngữ cảnh 10 ký tự là hạn chế |
 
-**Kết quả (log huấn luyện của nhóm)**
+**Thay đổi so với `chargpt.py` gốc** (bản gốc lưu ở `chargpt_goc.py`): thêm tham số dòng lệnh, thêm `eval_loss` đo val loss (trung bình 20 batch ngẫu nhiên trên 10% dữ liệu không dùng để huấn luyện) và in train/val loss mỗi 100 vòng, đặt seed, dùng `lr=learning_rate` thay cho giá trị ghi cứng, in dòng `CONFIG:` đầu log.
+
+**Về log:** `logQ7_B.txt` được chạy bằng phiên bản `chargpt.py` trước khi thêm tham số dòng lệnh nên không có dòng `CONFIG:` và dòng `FINAL:`. Cấu hình của nó được xác nhận bằng cách chạy lại 200 vòng với phiên bản hiện tại và `--lr 0.0004`: train loss và val loss ở vòng 0 (4.2876 / 4.1452) và vòng 100 (2.4544 / 2.4801) trùng khớp từng chữ số với log B.
+
+**Kết quả** (val loss ở vòng 9900 đo trên 20 batch; cột trung bình lấy 9 mốc từ vòng 9100 đến 9900 để giảm nhiễu):
+
+| Lần | lr | block | Train loss (vòng 9900) | Val loss (vòng 9900) | Val loss trung bình 9 mốc cuối | `FINAL` val loss (100 batch) | Thời gian |
+|---|---|---|---|---|---|---|---|
+| A | 0.00004 | 10 | 1.9639 | 2.0377 | 2.037 | 2.0341 | 1108 s |
+| B | 0.0004 | 10 | 1.6952 | 1.8328 | 1.834 | không có | không ghi |
+| C | 0.001 | 10 | 1.6535 | 1.8081 | 1.807 | 1.8186 | 1159 s |
+| D | 0.001 | 32 | 1.4452 | 1.6888 | 1.690 | 1.6920 | 4500 s (75 phút) |
+
+**Lưu ý khi so sánh:** val loss là trung bình trên mọi vị trí trong khối ký tự. Với `block_size = 32`, nhiều vị trí được nhìn nhiều ký tự phía trước hơn so với `block_size = 10`, nên loss của D thấp hơn một phần do cách tính chứ không hoàn toàn do mô hình giỏi hơn. Vì vậy D không so thẳng với A, B, C bằng con số; nên đọc cùng với văn bản sinh ra.
+
+**Đường cong học của lần B**
 
 | Vòng lặp | Train loss | Val loss |
 |---|---|---|
@@ -204,11 +228,27 @@ Mô hình ngôn ngữ mức ký tự, huấn luyện trên văn bản Shakespear
 | 9000 | 1.6695 | 1.8361 |
 | 9900 | 1.6952 | 1.8328 |
 
-- Val loss ban đầu (4.15) gần với mức đoán ngẫu nhiên trong bảng ký tự (ln 65 ≈ 4.17), sau đó giảm nhanh trong vài trăm vòng đầu rồi giảm chậm dần.
-- Train loss in ra là loss của đúng một batch nên dao động; val loss là trung bình của 20 batch nên ổn định hơn và đáng tin hơn để đánh giá.
-- Val loss cao hơn train loss khoảng 0.15 đến 0.17 và không tăng lên ở cuối huấn luyện, nên chưa có dấu hiệu học thuộc dữ liệu (overfitting) nghiêm trọng.
+**Đường cong học của lần D**
 
-**Văn bản sinh ra** (prompt `Pacman`, trích đầu mỗi đoạn)
+| Vòng lặp | Train loss | Val loss |
+|---|---|---|
+| 0 | 4.2883 | 3.9340 |
+| 100 | 2.3502 | 2.3664 |
+| 1000 | 1.7328 | 1.8851 |
+| 2000 | 1.6182 | 1.7910 |
+| 5000 | 1.4777 | 1.7181 |
+| 9000 | 1.4268 | 1.6903 |
+| 9900 | 1.4452 | 1.6888 |
+
+**Nhận xét**
+
+- **Learning rate gốc (A) học chậm.** Với cùng 10 000 vòng, val loss của A (≈ 2.04) cao hơn B (≈ 1.83) khoảng 0.2. Chênh lệch này lớn hơn nhiều so với độ dao động giữa các mốc đo (khoảng 0.01 đến 0.02), nên là khác biệt thật. Val loss ban đầu (≈ 4.15) gần mức đoán ngẫu nhiên trong bảng 65 ký tự (ln 65 ≈ 4.17).
+- **C hơn B một chút.** Val loss trung bình của C (1.807) thấp hơn B (1.834) khoảng 0.03, và cả 9 mốc cuối của C (1.79 đến 1.82) đều thấp hơn cả 9 mốc cuối của B (1.82 đến 1.85). Tuy nhiên mỗi cấu hình chỉ chạy một lần với một seed, nên chưa thể kết luận khác biệt nhỏ này bền vững. `FINAL` của C (1.8186, đo 100 batch) cao hơn con số ở vòng 9900 (1.8081, đo 20 batch), cho thấy mỗi mốc 20 batch dao động cỡ 0.01 đến 0.02, nên không nên đọc quá sâu những chênh lệch nhỏ.
+- **Ngữ cảnh dài hơn (D) cho val loss thấp hơn C khoảng 0.12** (1.690 so với 1.807, xem lưu ý về cách tính ở trên), đổi lại chạy lâu gấp khoảng 3.9 lần (4500 s so với 1159 s). Ở nửa sau huấn luyện, val loss của D giảm chậm (1.718 ở vòng 5000, 1.689 ở vòng 9900).
+- **Chưa có dấu hiệu val loss tăng lên ở cả bốn lần.** Chênh lệch giữa val loss và train loss (trung bình 9 mốc cuối) tăng dần theo mức độ mô hình học mạnh hơn: khoảng 0.11 (A), 0.17 (B), 0.19 (C), 0.25 (D). Nhóm chưa chạy quá 10 000 vòng nên chưa biết val loss có bắt đầu tăng (học thuộc dữ liệu) nếu huấn luyện lâu hơn hay không. Train loss in ra là của đúng một batch nên dao động; val loss là trung bình nhiều batch nên ổn định hơn.
+- **Văn bản sinh ra** (một mẫu cho mỗi lần, đánh giá chủ quan): lần A có nhiều từ bịa nhất (ví dụ `Pacmaninit pard tritrly hearcow--`, tên nhân vật `DUDINGETENIUS:`); B và C có nhiều từ thật hơn. Lần D giữ được cấu trúc kịch bản ổn định trên đoạn dài (nhiều lượt thoại với tên nhân vật có thật như `KING EDWARD IV:`, `WARWICK:`, `ISABELLA:`, `SICINIUS:`) và có những cụm gần đúng ngữ pháp (`O, thy liege that her.`), nhưng vẫn còn nhiều từ bịa (`Margarenci`, `imperopoved`) và câu chưa mạch lạc. Vì chỉ so một mẫu mỗi lần nên đây chỉ là cảm nhận, chưa phải kết luận thống kê.
+
+**Văn bản sinh ra ở lần B qua các giai đoạn** (prompt `Pacman`, trích đầu mỗi đoạn)
 
 | Vòng lặp | Đoạn trích |
 |---|---|
@@ -217,11 +257,18 @@ Mô hình ngôn ngữ mức ký tự, huấn luyện trên văn bản Shakespear
 | 5000 | `Pacmany! / To Clares Romest the banishful callus you blood! / QUEEN MONELIO: / Pluch, if as your evoy tadsuch in winteles?` |
 | 9000 | `Pacmantation deserve needl's stare we bruke noble go, when I am tamble procle? / O in the heath can fid Richmond change and wais you` |
 
-**Nhận xét:** ở vòng 0 chỉ có ký tự ngẫu nhiên. Sau 1000 vòng đã có từ tiếng Anh và dấu câu. Từ khoảng vòng 2000 trở đi xuất hiện định dạng kịch bản (tên nhân vật viết hoa kèm dấu hai chấm). Đến cuối, văn bản có nhiều từ thật và tên nhân vật có thật như `GLOUCESTER`, `YORK`, `MENENIUS` nhưng nhiều từ vẫn bị bịa và câu chưa mạch lạc. Nguyên nhân một phần là ngữ cảnh chỉ có 10 ký tự và mạng nhỏ huấn luyện trên CPU.
+**Văn bản sinh ra ở lần D qua các giai đoạn** (prompt `Pacman`, trích đầu mỗi đoạn)
+
+| Vòng lặp | Đoạn trích |
+|---|---|
+| 1000 | `Pacmani, man basrret unt, / Axt the happe a ezer neafer. Stonciowed thyshelll` |
+| 5000 | `Pacmany! / Tour that bestseets; thermery for him; / And, were within is peace;` |
+| 9000 | `Pacmantaid be; / And the a tworld here speed, noble go God! Who fit therm. / SICINIUS: / The hevil, look: and with a good of re` |
+| Cuối (`FINAL SAMPLE`) | `Pacmanion to him? O what they, / To vill we make your repose to makes that again I ear. / KING EDWARD IV: / O, thy liege that her. / WARWICK:` |
 
 ## 6. Kết quả
 
-Số liệu ghi theo các lần chạy của nhóm (có thể dao động nhẹ giữa các lần chạy do tính ngẫu nhiên).
+Số liệu ghi theo các lần chạy của nhóm (có thể dao động nhẹ giữa các lần chạy do tính ngẫu nhiên). Lần chạy toàn bộ `python autograder.py --no-graphics` cho `Total: 25/25` trong 143 giây. Tập test của Q5 do đề thiết kế rất nhỏ (một tập MNIST rút gọn, nằm trong chính tập huấn luyện của câu này) nên con số của Q5 dao động nhiều giữa các lần chạy và không phản ánh khả năng nhận chữ mới.
 
 | Câu | Ngưỡng đạt | Kết quả | Điểm |
 |---|---|---|---|
@@ -229,10 +276,7 @@ Số liệu ghi theo các lần chạy của nhóm (có thể dao động nhẹ 
 | Q2 | Loss ≤ 0.02 | Loss ≈ 0.0092 | 5/5 |
 | Q3 | Test accuracy ≥ 97% | ≈ 97.96% | 5/5 |
 | Q4 | Test accuracy ≥ 81% | 86.2% (dừng ở epoch 17) | 5/5 |
-| Q5 | Test accuracy ≥ 80% | ≈ 92% | 3/3 |
+| Q5 | Test accuracy ≥ 80% | 92% đến 98% tùy lần chạy | 3/3 |
 | Q6 | Khớp kết quả autograder | Pass | 2/2 |
-| Q7 | Không chấm | Val loss ≈ 1.83 | 0 |
+| Q7 | Không chấm | Val loss ≈ 1.83 (lr 0.0004); ≈ 1.81 (lr 0.001); ≈ 1.69 (lr 0.001, ngữ cảnh 32) | 0 |
 | | **Tổng** | | **25/25** |
-
-
-
