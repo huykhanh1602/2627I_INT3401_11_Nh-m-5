@@ -22,65 +22,16 @@ from torch import movedim
 
 class PerceptronModel(Module):
     def __init__(self, dimensions):
-        """
-        Initialize a new Perceptron instance.
-
-        A perceptron classifies data points as either belonging to a particular
-        class (+1) or not (-1). `dimensions` is the dimensionality of the data.
-        For example, dimensions=2 would mean that the perceptron must classify
-        2D points.
-
-        In order for our autograder to detect your weight, initialize it as a
-        pytorch Parameter object as follows:
-
-        Parameter(weight_vector)
-
-        where weight_vector is a pytorch Tensor of dimension 'dimensions'
-
-        Hint: You can use ones(dim) to create a tensor of dimension dim.
-        """
         super(PerceptronModel, self).__init__()
-        
-        "*** YOUR CODE HERE ***"
-        self.w = Parameter(ones(dimensions))
-
-
+        self.w = Parameter(ones(1, dimensions))   # trọng số, shape (1, dimensions)
     def get_weights(self):
-        """
-        Return a Parameter instance with the current weights of the perceptron.
-        """
         return self.w
-
     def forward(self, x):
-        """
-        Calculates the score assigned by the perceptron to a data point x.
-
-        Inputs:
-            x: a node with shape (dimensions)
-        Returns: a node containing a single number (the score)
-
-        The pytorch function `tensordot` may be helpful here.
-        """
-        "*** YOUR CODE HERE ***"
-        return tensordot(self.w, x, dims=1)
-
-        
+        return matmul(x, self.w.T)                # tích vô hướng w·x
 
     def get_prediction(self, x):
-        """
-        Calculates the predicted class for a single data point `x`.
-
-        Returns: 1 or -1
-        """
-        score = self(x)
-
-        "*** YOUR CODE HERE ***"
-        if score.item() >= 0:
-            return 1
-        else:
-            return -1
-
-
+        score = self.forward(x)
+        return 1 if score.item() >= 0 else -1
 
 class RegressionModel(Module):
     """
@@ -90,30 +41,16 @@ class RegressionModel(Module):
     """
 
     def __init__(self):
-        # Initialize your model parameters here
-        "*** YOUR CODE HERE ***"
         super().__init__()
-        self.fc1 = Linear(1, 64)
-        self.fc2 = Linear(64, 64)
-        self.fc3 = Linear(64, 1)
+        self.l1 = Linear(1, 128)
+        self.l2 = Linear(128, 128)
+        self.l3 = Linear(128, 1)
    
 
     def forward(self, x):
-        """
-        Runs the model for a batch of examples.
-
-        Inputs:
-            x: a node with shape (batch_size x 1)
-        Returns:
-            A node with shape (batch_size x 1) containing predicted y-values
-        """
-        "*** YOUR CODE HERE ***"
-        x = relu(self.fc1(x))
-        x = relu(self.fc2(x))
-        x = self.fc3(x)
-
-        return x
-
+        h = relu(self.l1(x))
+        h = relu(self.l2(h))
+        return self.l3(h)   
 
 
 class DigitClassificationModel(Module):
@@ -137,10 +74,9 @@ class DigitClassificationModel(Module):
         input_size = 28 * 28
         output_size = 10
         "*** YOUR CODE HERE ***"
-        self.fc1 = Linear(input_size, 256)
-        self.fc2 = Linear(256, 128)
-        self.fc3 = Linear(128, output_size)
-
+        self.l1 = Linear(input_size, 400)
+        self.l2 = Linear(400, 200)
+        self.l3 = Linear(200, output_size)
 
     def forward(self, x):
         """
@@ -157,13 +93,9 @@ class DigitClassificationModel(Module):
                 (also called logits)
         """
         """ YOUR CODE HERE """
-        x = relu(self.fc1(x))
-        x = relu(self.fc2(x))
-        x = self.fc3(x)
-
-        return x
-
-
+        h = relu(self.l1(x))
+        h = relu(self.l2(h))
+        return self.l3(h)     
 
 class LanguageIDModel(Module):
     """
@@ -245,27 +177,20 @@ def Convolve(input: tensor, weight: tensor):
     The method 'zeros((y_dim,x_dim))' may also be useful. It initializes a pytorch tensor with dimensions (y_dim, x_dim), with every value
     set to zero.
     """
-    # Lấy kích thước của ảnh input và kernel
-    input_tensor_dimensions = input.shape        # (H_in, W_in), ví dụ 28x28
-    weight_dimensions = weight.shape             # (H_k, W_k), ví dụ 3x3
+    input_tensor_dimensions = input.shape
+    weight_dimensions = weight.shape
+    Output_Tensor = tensor(())
+    "*** YOUR CODE HERE ***"
+    H, W = input.shape
+    kh, kw = weight.shape
+    out_h, out_w = H - kh + 1, W - kw + 1
 
-    # Kích thước output sau khi trượt kernel (không padding, stride = 1):
-    # out = H_in - H_k + 1  (và tương tự cho chiều rộng)
-    y_dim = input_tensor_dimensions[0] - weight_dimensions[0] + 1   # 28 - 3 + 1 = 26
-    x_dim = input_tensor_dimensions[1] - weight_dimensions[1] + 1   # 28 - 3 + 1 = 26
-    Output_Tensor = zeros((y_dim, x_dim))        # ma trận output khởi tạo toàn số 0
-
-    # Trượt kernel qua từng vị trí (y, x) trên input
-    for y in range(y_dim):
-        for x in range(x_dim):
-            # Cắt cửa sổ con có kích thước bằng kernel tại vị trí (y, x)
-            window = input[y:y + weight_dimensions[0], x:x + weight_dimensions[1]]
-            # Nhân từng phần tử tương ứng (element-wise) rồi cộng tổng lại:
-            # tensordot(window, weight, dims=2) = tổng(window * weight) trên cả 2 chiều
-            Output_Tensor[y, x] = tensordot(window, weight, dims=2)
-
-    "*** End Code ***"
-    return Output_Tensor
+    out = zeros(out_h, out_w)
+    for a in range(kh):
+        for b in range(kw):
+            # mỗi phần tử kernel nhân với một "lát cắt" của ảnh rồi cộng dồn
+            out = out + weight[a, b] * input[a:a + out_h, b:b + out_w]
+    return out
 
 
 class DigitConvolutionalModel(Module):
@@ -286,13 +211,9 @@ class DigitConvolutionalModel(Module):
         output_size = 10
 
         self.convolution_weights = Parameter(ones((3, 3)))
-
-        # Sau khi Convolve với kernel 3x3 lên ảnh 28x28, kích thước còn lại là 26x26
-        input_size = 26 * 26                     # 676 đặc trưng sau khi flatten
-        hidden_size = 128                        # kích thước lớp ẩn
-        self.fc1 = Linear(input_size, hidden_size)      # 676 -> hidden_size
-        self.fc2 = Linear(hidden_size, output_size)     # hidden_size -> 10 (logits)
-
+        """ YOUR CODE HERE """
+        self.l1 = Linear(26 * 26, 128)     # 26 = 28 - 3 + 1 (với kernel 3x3)
+        self.l2 = Linear(128, output_size)
 
     def forward(self, x):
         """
@@ -303,11 +224,10 @@ class DigitConvolutionalModel(Module):
         x = stack(
             list(map(lambda sample: Convolve(sample, self.convolution_weights), x))
         )
-        x = x.flatten(start_dim=1)          # x giờ có shape (batch_size, 26*26) - vector 1 chiều
-
-        x = relu(self.fc1(x))               # lớp ẩn: Linear + relu
-        return self.fc2(x)                  # logits (batch_size, 10) - KHÔNG relu ở lớp cuối
-
+        x = x.flatten(start_dim=1)
+        """ YOUR CODE HERE """
+        x = relu(self.l1(x))
+        return self.l2(x)       # không relu ở lớp cuối
 
 class Attention(Module):
     def __init__(self, layer_size, block_size):
@@ -345,23 +265,16 @@ class Attention(Module):
         """
         B, T, C = input.size()
 
-        # B1: Chiếu input lên 3 không gian Query, Key, Value
-        Q = self.q_layer(input)             # Query  (B, T, C)
-        K = self.k_layer(input)             # Key    (B, T, C)
-        V = self.v_layer(input)             # Value  (B, T, C)
+        """YOUR CODE HERE"""
+        Q = self.q_layer(input)                        # "câu hỏi" của mỗi ký tự
+        K = self.k_layer(input)                        # "nhãn" của mỗi ký tự
+        V = self.v_layer(input)                        # "nội dung" của mỗi ký tự
 
-        # B2: Chuyển vị K từ (B, T, C) -> (B, C, T) để sẵn sàng nhân matmul với Q
-        K_T = movedim(K, 1, 2)
+        # điểm liên quan giữa mọi cặp vị trí, shape (B, T, T)
+        M = matmul(Q, movedim(K, 1, 2)) / (self.layer_size ** 0.5)
 
-        # B3: Scaled Dot-Product: nhân Q với K^T rồi chia sqrt(layer_size) để ổn định gradient
-        scores = matmul(Q, K_T) / (self.layer_size ** 0.5)      # (B, T, T)
+        # mặt nạ nhân quả: vị trí i chỉ nhìn được các vị trí 0..i
+        M = M.masked_fill(self.mask[:, :, :T, :T] == 0, float('-inf'))[0]
 
-        # B4: Causal Mask - chặn vị trí tương lai (mask tam giác dưới), vị trí bị chặn = -inf
-        M = scores.masked_fill(self.mask[:, :, :T, :T] == 0, float('-inf'))[0]    # (T, T)
-
-        # B5: Softmax dọc theo chiều cuối cùng -> phân phối xác suất attention
-        attention_weights = softmax(M, dim=-1)                  # (T, T)
-
-        # B6: Tổ hợp có trọng số các Value theo attention weights
-        return matmul(attention_weights, V)                     # (B, T, C)
-
+        weights = softmax(M, dim=-1)                   # mỗi hàng cộng lại bằng 1
+        return matmul(weights, V)                      # trung bình có trọng số của V

@@ -14,7 +14,6 @@ def regression_loss(y_pred, y):
     return mse_loss(y_pred, y)
 
 
-
 def digitclassifier_loss(y_pred, y):
     """
     Computes the loss for a batch of examples.
@@ -29,8 +28,7 @@ def digitclassifier_loss(y_pred, y):
     Returns: a loss tensor
     """
     """ YOUR CODE HERE """
-    return cross_entropy(y_pred, y.argmax(dim=1))
-
+    return cross_entropy(y_pred, y)
 
 def languageid_loss(y_pred, y):
     """
@@ -63,4 +61,4 @@ def digitconvolution_Loss(y_pred, y):
     Returns: a loss tensor
     """
     """ YOUR CODE HERE """
-    return cross_entropy(y_pred, y)     # Cross-entropy chuẩn cho bài toán phân loại 10 chữ số
+    return cross_entropy(y_pred, y)

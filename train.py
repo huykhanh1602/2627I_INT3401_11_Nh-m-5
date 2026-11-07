@@ -31,20 +31,16 @@ def train_perceptron(model, dataset):
     with no_grad():
         dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
         "*** YOUR CODE HERE ***"
-        converged = False
-
-        while not converged:
-            converged = True
-
+        while True:
+            mistakes = 0
             for batch in dataloader:
-                x = batch["x"].squeeze(0)
-                y = batch["label"].item()
-
-                prediction = model.get_prediction(x)
-
-                if prediction != y:
-                    model.w += y * x
-                    converged = False
+                x = batch['x']
+                y = batch['label'].item()
+                if model.get_prediction(x) != y:   # dự đoán sai
+                    model.w += y * x               # kéo w về phía đáp án đúng
+                    mistakes += 1
+            if mistakes == 0:                      # cả lượt không sai: xong
+                break
 
 
 def train_regression(model, dataset):
@@ -63,41 +59,25 @@ def train_regression(model, dataset):
         
     """
     "*** YOUR CODE HERE ***"
-    model.train()
+    dataloader = DataLoader(dataset, batch_size=25, shuffle=True)
+    optimizer = optim.Adam(model.parameters(), lr=0.005)
 
-    dataloader = DataLoader(
-        dataset,
-        batch_size=64,
-        shuffle=True
-    )
-
-    optimizer = optim.Adam(
-        model.parameters(),
-        lr=0.001
-    )
-
-    for epoch in range(200):
-        total_loss = 0.0
-
+    for epoch in range(2000):
+        total, count = 0.0, 0
         for batch in dataloader:
-            x = batch["x"]
-            y = batch["label"]
-
+            x = batch['x']
+            y = batch['label']
             optimizer.zero_grad()
-
-            y_pred = model(x)
-            loss = regression_loss(y_pred, y)
-
+            loss = regression_loss(model(x), y)
             loss.backward()
             optimizer.step()
-
-            total_loss += loss.item()
-
-        if (epoch + 1) % 20 == 0:
-            print(
-                f"Epoch {epoch + 1}/200, "
-                f"Loss: {total_loss / len(dataloader):.6f}"
-            )
+            total += loss.item() * len(x)
+            count += len(x)
+        avg_loss = total / count
+        if epoch % 50 == 0:
+            print(f"Epoch {epoch}: loss = {avg_loss:.5f}")
+        if avg_loss < 0.01:        # dừng sớm, thấp hơn ngưỡng 0.02 để có dư địa
+            break
 
 
 def train_digitclassifier(model, dataset):
@@ -106,41 +86,24 @@ def train_digitclassifier(model, dataset):
     """
     model.train()
     """ YOUR CODE HERE """
-    dataloader = DataLoader(
-        dataset,
-        batch_size=128,
-        shuffle=True
-    )
+    dataloader = DataLoader(dataset, batch_size=100, shuffle=True)
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.5)
 
-    optimizer = optim.Adam(
-        model.parameters(),
-        lr=0.001
-    )
-
-    for epoch in range(15):
-        total_loss = 0.0
-
+    for epoch in range(30):
         for batch in dataloader:
-            x = batch["x"]
-            y = batch["label"]
-
+            x = batch['x']
+            y = batch['label']
             optimizer.zero_grad()
-
-            y_pred = model(x)
-
-            loss = digitclassifier_loss(y_pred, y)
-
+            loss = digitclassifier_loss(model(x), y)
             loss.backward()
-
             optimizer.step()
+        scheduler.step()                      # giảm lr dần sau mỗi 3 epoch
 
-            total_loss += loss.item()
-
-        print(
-            f"Epoch {epoch + 1}/15, "
-            f"Loss: {total_loss / len(dataloader):.4f}"
-        )
-
+        val_acc = dataset.get_validation_accuracy()
+        print(f"Epoch {epoch + 1}: validation accuracy = {val_acc:.4f}")
+        if val_acc >= 0.982:                  # ngưỡng dừng cao hơn
+            break
 
 def train_languageid(model, dataset):
     """
@@ -182,22 +145,21 @@ def Train_DigitConvolution(model, dataset):
     """
     Trains the model.
     """
+    """ YOUR CODE HERE """
     model.train()
-    dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
+    dataloader = DataLoader(dataset, batch_size=50, shuffle=True)
     optimizer = optim.Adam(model.parameters(), lr=0.002)
 
-    for epoch in range(30):
+    for epoch in range(15):
         for batch in dataloader:
-            x = batch['x']              # đặc trưng ảnh MNIST
-            y = batch['label']          # nhãn chữ số
-
-            optimizer.zero_grad()       # xóa gradient của lượt trước
-            y_pred = model(x)           # forward: dự đoán logits
-            loss = digitconvolution_Loss(y_pred, y)
-            loss.backward()             # tính gradient
-            optimizer.step()            # cập nhật trọng số
+            x = batch['x']
+            y = batch['label']
+            optimizer.zero_grad()
+            loss = digitconvolution_Loss(model(x), y)
+            loss.backward()
+            optimizer.step()
 
         val_acc = dataset.get_validation_accuracy()
         print(f"Epoch {epoch + 1}: validation accuracy = {val_acc:.4f}")
-        if val_acc >= 0.80:             # dừng sớm khi đạt yêu cầu >= 80%
+        if val_acc >= 0.86:     # đề yêu cầu 80%, đặt cao hơn để có dư địa
             break
